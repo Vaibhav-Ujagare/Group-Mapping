@@ -48,7 +48,6 @@ export const isAdmin = asyncHandler(async (req, res, next) => {
         if (!user) {
             throw new ApiError(401, "Access Deined - Admin Only");
         }
-
         next();
     } catch (error) {
         throw new ApiError(401, error?.message || "Error Checking Admin Role");

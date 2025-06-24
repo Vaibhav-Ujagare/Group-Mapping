@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 
 export const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -85,4 +86,17 @@ export const adminLogin = asyncHandler(async (req, res) => {
     } catch (error) {
         throw new ApiError(400, error || "Error while loggin");
     }
+});
+
+export const uploadCSV = asyncHandler(async (req, res) => {
+    const csvFile = req.files?.cohort_data[0]?.path;
+
+    if (!csvFile) {
+        throw new ApiError(400, "CSV file is required");
+    }
+    const cloudinaryPath = await uploadOnCloudinary(csvFile);
+
+    return res
+        .status(201)
+        .json(new ApiResponse(200, csvFile, "File Upload Successfully"));
 });
