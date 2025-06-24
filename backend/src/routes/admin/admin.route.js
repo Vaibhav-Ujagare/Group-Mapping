@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, uploadCSV } from "./admin.controller.js";
+import { adminLogin, showCSVData, uploadCSV } from "./admin.controller.js";
 import { upload } from "../../middleware/multer.middleware.js";
 import { isLoggedIn, isAdmin } from "../../middleware/auth.middleware.js";
 
@@ -19,5 +19,7 @@ adminRoute.post(
     ]),
     uploadCSV,
 );
+
+adminRoute.get("/student-data", showCSVData);
 
 export default adminRoute;

@@ -5,6 +5,10 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../../utils/cloudinary.js";
+import { UserRole } from "../../generated/prisma/index.js";
+
+import csv from "csv-parser";
+import fs from "fs";
 
 export const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -90,13 +94,60 @@ export const adminLogin = asyncHandler(async (req, res) => {
 
 export const uploadCSV = asyncHandler(async (req, res) => {
     const csvFile = req.files?.cohort_data[0]?.path;
-
+    const results = [];
     if (!csvFile) {
         throw new ApiError(400, "CSV file is required");
     }
-    const cloudinaryPath = await uploadOnCloudinary(csvFile);
+
+    fs.createReadStream(csvFile)
+        .pipe(csv())
+        .on("data", (data) => results.push(data))
+        .on("end", async () => {
+            try {
+                for (const row of results) {
+                    let str =
+                        "ABCDEFGHIJKLMOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0987654321";
+                    let pass = "";
+
+                    for (let i = 1; i <= 10; i++) {
+                        let char = Math.floor(Math.random() * str.length + 1);
+                        pass += str.charAt(char);
+                    }
+                    const hashedPassword = await bcrypt.hash(pass, 10);
+
+                    await db.student_details.create({
+                        data: {
+                            email: row.Email,
+                            password: hashedPassword,
+                            role: UserRole.MEMBER,
+                        },
+                    });
+                }
+            } catch (error) {
+                throw new ApiError(500, error || "Failed to insert data");
+            } finally {
+                fs.unlinkSync(csvFile);
+            }
+        });
 
     return res
         .status(201)
         .json(new ApiResponse(200, csvFile, "File Upload Successfully"));
+});
+
+export const showCSVData = asyncHandler(async (req, res) => {
+    const allStudents = await db.student_details.findMany({
+        select: {
+            email: true,
+        },
+    });
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                allStudents,
+                "All Student details Fetched Successfully",
+            ),
+        );
 });
