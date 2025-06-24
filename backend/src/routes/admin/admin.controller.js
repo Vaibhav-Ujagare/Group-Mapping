@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
-import { db } from "../db/dbConnection.js";
+import { db } from "../../db/dbConnection.js";
 import jwt from "jsonwebtoken";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../../utils/apiError.js";
+import { ApiResponse } from "../../utils/apiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 
 export const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -51,36 +51,38 @@ export const generateAccessAndRefreshTokens = async (userId) => {
 
 export const adminLogin = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
+    try {
+        const user = await db.super_admin.findUnique({
+            where: {
+                username,
+            },
+        });
 
-    const user = await db.super_admin.findUnique({
-        where: {
-            username,
-        },
-    });
+        if (!user) {
+            throw new ApiError(400, "User Not Found");
+        }
 
-    if (!user) {
-        throw new ApiError(400, "User Not Found");
+        const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordMatched) {
+            throw new ApiError(401, "Username or Password is incorrect");
+        }
+
+        const { accessToken, refreshToken } =
+            await generateAccessAndRefreshTokens(user.id);
+
+        const cookieOptions = {
+            httpOnly: true,
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        };
+        res.cookie("accessToken", accessToken, cookieOptions);
+        res.cookie("refreshToken", refreshToken, cookieOptions);
+
+        return res
+            .status(201)
+            .json(new ApiResponse(200, user, "Logged in as admin"));
+    } catch (error) {
+        throw new ApiError(400, error || "Error while loggin");
     }
-
-    const isPasswordMatched = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatched) {
-        throw new ApiError(401, "Username or Password is incorrect");
-    }
-
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-        user.id,
-    );
-
-    const cookieOptions = {
-        httpOnly: true,
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-    };
-    res.cookie("accessToken", accessToken, cookieOptions);
-    res.cookie("refreshToken", refreshToken, cookieOptions);
-
-    return res
-        .status(201)
-        .json(new ApiResponse(200, newUser, "Logged in as admin"));
 });

@@ -30,6 +30,8 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-import adminRoute from "./routes/admin.route.js";
+import adminRoute from "./routes/admin/admin.route.js";
+import cohortRoute from "./routes/cohort/cohort.route.js";
 
 app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/cohort", cohortRoute);
