@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import { db } from "../db/dbConnection.js";
 import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -32,8 +35,6 @@ export const generateAccessAndRefreshTokens = async (userId) => {
             { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
         );
 
-        console.log(user.username);
-
         await db.super_admin.update({
             where: { id: user.id },
             data: { refreshToken },
@@ -48,11 +49,9 @@ export const generateAccessAndRefreshTokens = async (userId) => {
     }
 };
 
-export const adminLogin = async (req, res) => {
+export const adminLogin = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
 
-    try {
-    } catch (error) {}
     const user = await db.super_admin.findUnique({
         where: {
             username,
@@ -60,15 +59,13 @@ export const adminLogin = async (req, res) => {
     });
 
     if (!user) {
-        return res.status(400).json({ error: "User Not Found" });
+        throw new ApiError(400, "User Not Found");
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatched) {
-        return res
-            .status(400)
-            .json({ error: "User name or Password incorrect" });
+        throw new ApiError(401, "Username or Password is incorrect");
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -83,7 +80,7 @@ export const adminLogin = async (req, res) => {
     res.cookie("accessToken", accessToken, cookieOptions);
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    return res.status(200).json({
-        message: "You Logged in as super admin",
-    });
-};
+    return res
+        .status(201)
+        .json(new ApiResponse(200, newUser, "Logged in as admin"));
+});
