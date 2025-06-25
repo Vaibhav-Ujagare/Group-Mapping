@@ -53,3 +53,25 @@ export const isAdmin = asyncHandler(async (req, res, next) => {
         throw new ApiError(401, error?.message || "Error Checking Admin Role");
     }
 });
+
+export const isLeader = asyncHandler(async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        const user = await db.super_admin.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+        if (user.role === "LEADER") {
+            throw new ApiError(
+                401,
+                "Access Deined - Your are already leader of group",
+            );
+        }
+        next();
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Error Checking Admin Role");
+    }
+});

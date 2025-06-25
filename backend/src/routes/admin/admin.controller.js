@@ -4,11 +4,17 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import { UserRole } from "../../generated/prisma/index.js";
-
+import crypto from "crypto";
 import csv from "csv-parser";
 import fs from "fs";
+
+import {
+    sendMail,
+    emailVerificationMailGenContent,
+    resendEmailVerificationMailGenContent,
+    resetPasswordVerificationMailGenContent,
+} from "../../utils/mail.js";
 
 export const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -115,12 +121,31 @@ export const uploadCSV = asyncHandler(async (req, res) => {
                     }
                     const hashedPassword = await bcrypt.hash(pass, 10);
 
+                    const emailVerificationToken = crypto
+                        .randomBytes(32)
+                        .toString("hex");
+
                     await db.student_details.create({
                         data: {
                             email: row.Email,
                             password: hashedPassword,
                             role: UserRole.MEMBER,
+                            emailVerificationToken: emailVerificationToken,
+                            emailVerificationExpiry: new Date(
+                                Date.now() + 20 * 60 * 1000,
+                            ),
                         },
+                    });
+
+                    await sendMail({
+                        email: row.Email,
+                        subject: "Verify your email",
+                        mailGenContent: emailVerificationMailGenContent(
+                            row.Email,
+                            `${process.env.BASE_URL}/api/v1/user/verify/${emailVerificationToken}`,
+                            row.Email,
+                            pass,
+                        ),
                     });
                 }
             } catch (error) {
