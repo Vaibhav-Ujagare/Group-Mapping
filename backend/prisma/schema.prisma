@@ -46,6 +46,7 @@ model student_details {
   id                        String    @id @default(uuid())
   email                     String    @unique
   password                  String
+  cohort_name               String
   role                      UserRole
   github_link               String?
   hashnode_link             String?
@@ -90,4 +91,24 @@ model notice_board_details {
 
   createdBy student_details @relation(fields: [student_Id], references: [id], onDelete: Cascade)
   belong_To group_details   @relation(fields: [group_Id], references: [id], onDelete: Cascade)
+}
+
+model student_group_mapping_details {
+  id             String    @id @default(uuid())
+  group_Id       String
+  student_Id     String
+  joining_date   DateTime?
+  leaving_date   DateTime?
+  removed_reason DateTime?
+  removed_date   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model student_cohort_mapping_details {
+  id         String   @id @default(uuid())
+  student_Id String
+  cohort_Id  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

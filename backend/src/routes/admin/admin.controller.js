@@ -69,8 +69,6 @@ export const adminLogin = asyncHandler(async (req, res) => {
             },
         });
 
-        const pass = await bcrypt.hash("SuperAdmin@12345", 10);
-        console.log(pass);
         if (!user) {
             throw new ApiError(400, "User Not Found");
         }
@@ -131,6 +129,7 @@ export const uploadCSV = asyncHandler(async (req, res) => {
                         data: {
                             email: row.Email,
                             password: hashedPassword,
+                            cohort_name: row.Cohort_Name,
                             role: UserRole.MEMBER,
                             emailVerificationToken: emailVerificationToken,
                             emailVerificationExpiry: new Date(
@@ -165,7 +164,12 @@ export const uploadCSV = asyncHandler(async (req, res) => {
 export const showCSVData = asyncHandler(async (req, res) => {
     const allStudents = await db.student_details.findMany({
         select: {
+            id: true,
             email: true,
+            cohort_name: true,
+            role: true,
+            canCreateGroup: true,
+            isGroupJoined: true,
         },
     });
     return res

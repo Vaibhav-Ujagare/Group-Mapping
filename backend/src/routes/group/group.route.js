@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { createGroup } from "./group.controller.js";
+import { createGroup, getAllGroups } from "./group.controller.js";
 import { isLoggedIn } from "../../middleware/auth.middleware.js";
 
 const groupRoute = Router();
 
 groupRoute.post("/create", isLoggedIn, createGroup);
+
+groupRoute.get("/all-groups", isLoggedIn, getAllGroups);
 
 export default groupRoute;

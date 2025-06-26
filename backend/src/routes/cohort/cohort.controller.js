@@ -8,6 +8,10 @@ export const createCohort = asyncHandler(async (req, res) => {
     const user_id = req.user.id;
 
     try {
+        if (!cohort_desc || !cohort_name) {
+            throw new ApiError(400, "Cohort name or description required");
+        }
+
         if (!user_id) {
             throw new ApiError(401, "User Not Found");
         }

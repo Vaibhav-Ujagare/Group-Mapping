@@ -39,7 +39,35 @@ export const createGroup = asyncHandler(async (req, res) => {
         },
     });
 
+    await db.student_group_mapping_details.create({
+        data: {
+            group_Id: newGroup.id,
+            student_Id: user_id,
+            joining_date: new Date(Date.now()),
+        },
+    });
+
     return res
         .status(201)
         .json(new ApiResponse(200, newGroup, "Group Created Successfully"));
+});
+
+export const getAllGroups = asyncHandler(async (req, res) => {
+    const allGroups = await db.group_details.findMany({
+        include: {
+            createdBy: {
+                select: {
+                    id: true,
+                },
+            },
+        },
+    });
+
+    console.log(allGroups);
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(200, allGroups, "Fetched All Groups Successfully"),
+        );
 });
