@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { createCohort } from "./cohort.controller.js";
-import { isLoggedIn, isAdmin } from "../../middleware/auth.middleware.js";
+import { isSuperAdmin } from "../../middleware/auth.middleware.js";
 
 const cohortRoute = Router();
 
-cohortRoute.post("/create", isLoggedIn, isAdmin, createCohort);
+cohortRoute.post("/create", isSuperAdmin, createCohort);
 
 export default cohortRoute;

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { adminLogin, showCSVData, uploadCSV } from "./admin.controller.js";
 import { upload } from "../../middleware/multer.middleware.js";
-import { isLoggedIn, isAdmin } from "../../middleware/auth.middleware.js";
+import { isSuperAdmin } from "../../middleware/auth.middleware.js";
 
 const adminRoute = Router();
 
@@ -9,8 +9,7 @@ adminRoute.post("/login", adminLogin);
 
 adminRoute.post(
     "/upload",
-    isLoggedIn,
-    isAdmin,
+    isSuperAdmin,
     upload.fields([
         {
             name: "cohort_data",

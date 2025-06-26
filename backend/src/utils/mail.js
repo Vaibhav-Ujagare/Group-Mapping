@@ -12,7 +12,6 @@ export const sendMail = async (options) => {
 
     const emailText = mailGenerator.generatePlaintext(options.mailGenContent);
     const emailHTML = mailGenerator.generate(options.mailGenContent);
-    console.log(emailHTML);
     const transporter = nodemailer.createTransport({
         host: process.env.MAILTRAP_HOST,
         port: process.env.MAILTRAP_PORT,

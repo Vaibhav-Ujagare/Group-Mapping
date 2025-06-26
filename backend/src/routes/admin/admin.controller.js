@@ -48,7 +48,7 @@ export const generateAccessAndRefreshTokens = async (userId) => {
 
         await db.super_admin.update({
             where: { id: user.id },
-            data: { refreshToken },
+            data: { refreshToken: refreshToken, accessToken: accessToken },
         });
 
         return { accessToken, refreshToken };
@@ -69,6 +69,8 @@ export const adminLogin = asyncHandler(async (req, res) => {
             },
         });
 
+        const pass = await bcrypt.hash("SuperAdmin@12345", 10);
+        console.log(pass);
         if (!user) {
             throw new ApiError(400, "User Not Found");
         }

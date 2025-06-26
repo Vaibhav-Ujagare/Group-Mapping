@@ -20,24 +20,26 @@ enum UserRole {
 }
 
 model super_admin {
-  id             String           @id @default(uuid())
-  username       String           @unique
-  password       String
-  refreshToken   String?
-  accessToken    String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id           String   @id @default(uuid())
+  username     String   @unique
+  password     String
+  refreshToken String?
+  accessToken  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   cohort_details cohort_details[]
 }
 
 model cohort_details {
-  id            String      @id @default(ulid())
-  cohort_name   String      @unique
+  id            String   @id @default(ulid())
+  cohort_name   String   @unique
   cohort_desc   String
-  createBy      super_admin @relation(fields: [super_adminId], references: [id])
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   super_adminId String
+
+  createBy super_admin @relation(fields: [super_adminId], references: [id], onDelete: Cascade)
 }
 
 model student_details {
@@ -53,9 +55,39 @@ model student_details {
   accessToken               String?
   emailVerificationToken    String?
   emailVerificationExpiry   DateTime?
+  canCreateGroup            Boolean   @default(true)
+  isGroupJoined             Boolean   @default(false)
   isEmailVerified           Boolean   @default(false)
   forgotPasswordToken       String?
   forgotPasswordTokenExpiry DateTime?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
+
+  group_details        group_details[]
+  notice_board_details notice_board_details[]
+}
+
+model group_details {
+  id          String   @id @default(uuid())
+  group_name  String
+  group_desc  String
+  student_Id  String
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy            student_details        @relation(fields: [student_Id], references: [id], onDelete: Cascade)
+  notice_board_details notice_board_details[]
+}
+
+model notice_board_details {
+  id         String   @id @default(uuid())
+  board_text String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  student_Id String
+  group_Id   String
+
+  createdBy student_details @relation(fields: [student_Id], references: [id], onDelete: Cascade)
+  belong_To group_details   @relation(fields: [group_Id], references: [id], onDelete: Cascade)
 }

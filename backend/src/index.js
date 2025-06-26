@@ -33,7 +33,9 @@ app.listen(PORT, () => {
 import adminRoute from "./routes/admin/admin.route.js";
 import cohortRoute from "./routes/cohort/cohort.route.js";
 import userRoute from "./routes/user/user.route.js";
+import groupRoute from "./routes/group/group.route.js";
 
 app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/group", groupRoute);
 app.use("/api/v1/cohort", cohortRoute);
