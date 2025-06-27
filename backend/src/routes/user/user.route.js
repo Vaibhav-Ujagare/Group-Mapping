@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { isLoggedIn } from "../../middleware/auth.middleware.js";
 import {
+    getAllJoiningRequests,
     handleRequest,
     login,
     selectCohort,
-    sendJoinigRequest,
+    sendJoiningRequest,
 } from "./user.controller.js";
 
 const userRoute = Router();
@@ -13,8 +14,10 @@ userRoute.post("/login", login);
 
 userRoute.get("/select-cohort", isLoggedIn, selectCohort);
 
-userRoute.post("/request/:groupId", isLoggedIn, sendJoinigRequest);
+userRoute.post("/request/:groupId", isLoggedIn, sendJoiningRequest);
 
-userRoute.get("/handle-request", isLoggedIn, handleRequest);
+userRoute.get("/getAllRequests", isLoggedIn, getAllJoiningRequests);
+
+userRoute.post("/handle-request", isLoggedIn, handleRequest);
 
 export default userRoute;

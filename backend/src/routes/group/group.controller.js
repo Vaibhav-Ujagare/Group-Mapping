@@ -26,7 +26,7 @@ export const createGroup = asyncHandler(async (req, res) => {
         data: {
             group_name: name,
             group_desc: description,
-            student_Id: user_id,
+            createdById: user_id,
         },
     });
 
@@ -41,8 +41,8 @@ export const createGroup = asyncHandler(async (req, res) => {
 
     await db.student_group_mapping_details.create({
         data: {
-            group_Id: newGroup.id,
-            student_Id: user_id,
+            groupId: newGroup.id,
+            studentId: user_id,
             joining_date: new Date(Date.now()),
         },
     });
@@ -69,5 +69,30 @@ export const getAllGroups = asyncHandler(async (req, res) => {
         .status(201)
         .json(
             new ApiResponse(200, allGroups, "Fetched All Groups Successfully"),
+        );
+});
+
+export const getAllGroupMembers = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+
+    console.log(groupId);
+
+    const groupMembers = await db.student_group_mapping_details.findMany({
+        where: {
+            groupId: groupId,
+        },
+        include: {
+            student: true,
+        },
+    });
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { groupMembers },
+                "Fetched All Group Members Successfully",
+            ),
         );
 });

@@ -138,16 +138,19 @@ export const uploadCSV = asyncHandler(async (req, res) => {
                         },
                     });
 
-                    await sendMail({
-                        email: row.Email,
-                        subject: "Verify your email",
-                        mailGenContent: emailVerificationMailGenContent(
-                            row.Email,
-                            `${process.env.BASE_URL}/api/v1/user/verify/${emailVerificationToken}`,
-                            row.Email,
-                            pass,
-                        ),
-                    });
+                    console.log(row.Email);
+                    console.log(pass);
+
+                    // await sendMail({
+                    //     email: row.Email,
+                    //     subject: "Verify your email",
+                    //     mailGenContent: emailVerificationMailGenContent(
+                    //         row.Email,
+                    //         `${process.env.BASE_URL}/api/v1/user/verify/${emailVerificationToken}`,
+                    //         row.Email,
+                    //         pass,
+                    //     ),
+                    // });
                 }
             } catch (error) {
                 throw new ApiError(500, error || "Failed to insert data");

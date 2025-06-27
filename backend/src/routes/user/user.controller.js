@@ -113,8 +113,8 @@ export const selectCohort = asyncHandler(async (req, res) => {
     if (selected_cohort === "Web_Dev") {
         await db.student_cohort_mapping_details.create({
             data: {
-                student_Id: req.user.id,
-                cohort_Id: cohort.id,
+                studentId: req.user.id,
+                cohortId: cohort.id,
             },
         });
     }
@@ -124,9 +124,14 @@ export const selectCohort = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "All Cohort Fetched Successfully"));
 });
 
-export const sendJoinigRequest = asyncHandler(async (req, res) => {
+export const sendJoiningRequest = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     const { note } = req.body;
+    const userId = req.user.id;
+
+    console.log(userId);
+
+    // TODO: check user role if leader don't allow to send the request
 
     const group = await db.group_details.findFirst({
         where: {
@@ -140,11 +145,11 @@ export const sendJoinigRequest = asyncHandler(async (req, res) => {
 
     const newRequest = await db.group_joining_request_details.create({
         data: {
-            student_Id: req.user.id,
-            group_Id: groupId,
+            studentId: req.user.id,
+            groupId: groupId,
             status: RequestStatus.REQUESTED,
             request_note_by_student: note,
-            requestd_on: new Date(Date.now()),
+            requested_on: new Date(Date.now()),
         },
     });
 
@@ -155,28 +160,84 @@ export const sendJoinigRequest = asyncHandler(async (req, res) => {
         );
 });
 
-export const handleRequest = asyncHandler(async (req, res) => {
+export const getAllJoiningRequests = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
     const group = await db.student_group_mapping_details.findFirst({
         where: {
-            student_Id: userId,
+            studentId: userId,
         },
         select: {
-            group_Id: true,
+            groupId: true,
         },
     });
 
     const groupRequests = await db.group_joining_request_details.findMany({
         where: {
-            group_Id: group.group_Id,
+            groupId: group.groupId,
         },
     });
 
-    console.log(group);
-    console.log(groupRequests);
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { groupRequests },
+                "Request sent Successfully",
+            ),
+        );
+});
+
+export const handleRequest = asyncHandler(async (req, res) => {
+    const { requestId, action } = req.body;
+
+    const request = await db.group_joining_request_details.findUnique({
+        where: {
+            id: requestId,
+        },
+        include: {
+            group: true,
+        },
+    });
+
+    if (!request) {
+        throw new ApiError(400, "Request Not Found");
+    }
+
+    if (action === "ACCEPTED") {
+        await db.group_joining_request_details.update({
+            where: {
+                id: requestId,
+            },
+            data: {
+                status: RequestStatus.ACCEPTED,
+                responded_on: new Date(Date.now()),
+            },
+        });
+
+        await db.student_group_mapping_details.create({
+            data: {
+                groupId: request.groupId,
+                studentId: request.studentId,
+                joining_date: new Date(Date.now()),
+            },
+        });
+    }
+
+    if (action === "REJECTED") {
+        await db.group_joining_request_details.update({
+            where: {
+                id: requestId,
+            },
+            data: {
+                status: RequestStatus.REJECTED,
+                responded_on: new Date(Date.now()),
+            },
+        });
+    }
 
     return res
         .status(201)
-        .json(new ApiResponse(200, { userId }, "Request sent Successfully"));
+        .json(new ApiResponse(200, { request }, `Request ${action} `));
 });
