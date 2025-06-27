@@ -46,7 +46,8 @@ model cohort_details {
   updatedAt     DateTime @updatedAt
   super_adminId String
 
-  createBy super_admin @relation(fields: [super_adminId], references: [id], onDelete: Cascade)
+  createdBy                      super_admin                      @relation(fields: [super_adminId], references: [id], onDelete: Cascade)
+  student_cohort_mapping_details student_cohort_mapping_details[]
 }
 
 model student_details {
@@ -65,27 +66,31 @@ model student_details {
   emailVerificationExpiry   DateTime?
   canCreateGroup            Boolean   @default(true)
   isGroupJoined             Boolean   @default(false)
-  isEmailVerified           Boolean   @default(false)
   forgotPasswordToken       String?
   forgotPasswordTokenExpiry DateTime?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 
-  group_details        group_details[]
-  notice_board_details notice_board_details[]
+  group_details                  group_details[]
+  notice_board_details           notice_board_details[]
+  student_group_mapping_details  student_group_mapping_details[]
+  student_cohort_mapping_details student_cohort_mapping_details[]
+  group_joining_request_details  group_joining_request_details[]
 }
 
 model group_details {
   id          String   @id @default(uuid())
   group_name  String
   group_desc  String
-  student_Id  String
+  createdById String
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy            student_details        @relation(fields: [student_Id], references: [id], onDelete: Cascade)
-  notice_board_details notice_board_details[]
+  createdBy                     student_details                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  notice_board_details          notice_board_details[]
+  student_group_mapping_details student_group_mapping_details[]
+  group_joining_request_details group_joining_request_details[]
 }
 
 model notice_board_details {
@@ -97,38 +102,53 @@ model notice_board_details {
   group_Id   String
 
   createdBy student_details @relation(fields: [student_Id], references: [id], onDelete: Cascade)
-  belong_To group_details   @relation(fields: [group_Id], references: [id], onDelete: Cascade)
+  group     group_details   @relation(fields: [group_Id], references: [id], onDelete: Cascade)
 }
 
 model student_group_mapping_details {
   id             String    @id @default(uuid())
-  group_Id       String
-  student_Id     String
+  groupId        String
+  studentId      String
   joining_date   DateTime?
   leaving_date   DateTime?
   removed_reason DateTime?
   removed_date   DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  student student_details @relation(fields: [studentId], references: [id])
+  group   group_details   @relation(fields: [groupId], references: [id])
+
+  @@unique([studentId, groupId])
 }
 
 model student_cohort_mapping_details {
-  id         String   @id @default(uuid())
-  student_Id String
-  cohort_Id  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  studentId String
+  cohortId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student student_details @relation(fields: [studentId], references: [id])
+  cohort  cohort_details  @relation(fields: [cohortId], references: [id])
+
+  @@unique([studentId, cohortId])
 }
 
 model group_joining_request_details {
   id                      String        @id @default(uuid())
-  student_Id              String
-  group_Id                String
+  studentId               String
+  groupId                 String
   status                  RequestStatus
   request_note_by_student String
   rejection_remark        String?
-  requestd_on             DateTime?
+  requested_on            DateTime?
   responded_on            DateTime?
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
+
+  student student_details @relation(fields: [studentId], references: [id])
+  group   group_details   @relation(fields: [groupId], references: [id])
+
+  @@unique([studentId, groupId])
 }

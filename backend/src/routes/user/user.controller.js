@@ -154,3 +154,29 @@ export const sendJoinigRequest = asyncHandler(async (req, res) => {
             new ApiResponse(200, { newRequest }, "Request sent Successfully"),
         );
 });
+
+export const handleRequest = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+
+    const group = await db.student_group_mapping_details.findFirst({
+        where: {
+            student_Id: userId,
+        },
+        select: {
+            group_Id: true,
+        },
+    });
+
+    const groupRequests = await db.group_joining_request_details.findMany({
+        where: {
+            group_Id: group.group_Id,
+        },
+    });
+
+    console.log(group);
+    console.log(groupRequests);
+
+    return res
+        .status(201)
+        .json(new ApiResponse(200, { userId }, "Request sent Successfully"));
+});
