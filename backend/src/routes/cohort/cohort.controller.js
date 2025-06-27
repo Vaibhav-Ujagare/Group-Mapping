@@ -18,8 +18,8 @@ export const createCohort = asyncHandler(async (req, res) => {
 
         const newCohort = await db.cohort_details.create({
             data: {
-                cohort_name,
-                cohort_desc,
+                cohort_name: cohort_name,
+                cohort_desc: cohort_desc,
                 super_adminId: user_id,
             },
         });
