@@ -5,7 +5,6 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { UserRole } from "../../generated/prisma/index.js";
-import crypto from "crypto";
 import csv from "csv-parser";
 import fs from "fs";
 
@@ -121,20 +120,12 @@ export const uploadCSV = asyncHandler(async (req, res) => {
                     }
                     const hashedPassword = await bcrypt.hash(pass, 10);
 
-                    const emailVerificationToken = crypto
-                        .randomBytes(32)
-                        .toString("hex");
-
                     await db.student_details.create({
                         data: {
                             email: row.Email,
                             password: hashedPassword,
                             cohort_name: row.Cohort_Name,
                             role: UserRole.MEMBER,
-                            emailVerificationToken: emailVerificationToken,
-                            emailVerificationExpiry: new Date(
-                                Date.now() + 20 * 60 * 1000,
-                            ),
                         },
                     });
 

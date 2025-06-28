@@ -12,7 +12,7 @@ const userRoute = Router();
 
 userRoute.post("/login", login);
 
-userRoute.get("/select-cohort", isLoggedIn, selectCohort);
+userRoute.post("/select-cohort", isLoggedIn, selectCohort);
 
 userRoute.post("/request/:groupId", isLoggedIn, sendJoiningRequest);
 

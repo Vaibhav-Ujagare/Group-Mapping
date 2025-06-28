@@ -88,18 +88,15 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const selectCohort = asyncHandler(async (req, res) => {
-    // const { selected_cohort } = req.body;
-    const selected_cohort = "Web_Dev";
+    const { cohort_name } = req.body;
 
-    if (!selected_cohort) {
+    if (!cohort_name) {
         throw new ApiError(400, "Please select the cohort");
     }
 
-    const allCohorts = await db.cohort_details.findMany();
-
     const cohort = await db.cohort_details.findFirst({
         where: {
-            cohort_name: selected_cohort,
+            cohort_name: cohort_name,
         },
         select: {
             id: true,
@@ -110,7 +107,7 @@ export const selectCohort = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cohort Not Found");
     }
 
-    if (selected_cohort === "Web_Dev") {
+    if (cohort_name === "Web_Dev") {
         await db.student_cohort_mapping_details.create({
             data: {
                 studentId: req.user.id,
@@ -121,7 +118,7 @@ export const selectCohort = asyncHandler(async (req, res) => {
 
     return res
         .status(201)
-        .json(new ApiResponse(200, {}, "All Cohort Fetched Successfully"));
+        .json(new ApiResponse(200, {}, "Cohort Select Successfully"));
 });
 
 export const sendJoiningRequest = asyncHandler(async (req, res) => {
@@ -129,27 +126,43 @@ export const sendJoiningRequest = asyncHandler(async (req, res) => {
     const { note } = req.body;
     const userId = req.user.id;
 
-    console.log(userId);
-
-    // TODO: check user role if leader don't allow to send the request
-
-    const group = await db.group_details.findFirst({
+    const user = await db.student_details.findUnique({
         where: {
-            id: groupId,
+            id: userId,
         },
     });
 
-    if (!group) {
-        throw new ApiError(400, "Group Not Found");
+    if (user.role === "LEADER" || user.isGroupJoined) {
+        throw new ApiError(400, "You are group leader or part of other group");
+    }
+
+    const existingRequest = await db.group_joining_request_details.findFirst({
+        where: {
+            studentId: userId,
+            groupId: groupId,
+        },
+    });
+
+    if (existingRequest) {
+        throw new ApiError(400, "Request already send");
     }
 
     const newRequest = await db.group_joining_request_details.create({
         data: {
-            studentId: req.user.id,
+            studentId: userId,
             groupId: groupId,
             status: RequestStatus.REQUESTED,
             request_note_by_student: note,
             requested_on: new Date(Date.now()),
+        },
+    });
+
+    await db.student_details.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            canCreateGroup: false,
         },
     });
 
@@ -171,12 +184,23 @@ export const getAllJoiningRequests = asyncHandler(async (req, res) => {
             groupId: true,
         },
     });
+    console.log(group);
+    if (!group) {
+        throw new ApiError(400, "You have not create any group");
+    }
 
     const groupRequests = await db.group_joining_request_details.findMany({
         where: {
             groupId: group.groupId,
         },
     });
+    if (groupRequests.length === 0) {
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(200, {}, "There are no request available yet"),
+            );
+    }
 
     return res
         .status(201)
@@ -221,6 +245,15 @@ export const handleRequest = asyncHandler(async (req, res) => {
                 groupId: request.groupId,
                 studentId: request.studentId,
                 joining_date: new Date(Date.now()),
+            },
+        });
+
+        await db.student_details.update({
+            where: {
+                id: request.studentId,
+            },
+            data: {
+                isGroupJoined: true,
             },
         });
     }

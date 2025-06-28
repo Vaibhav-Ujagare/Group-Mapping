@@ -36,6 +36,24 @@ export const createGroup = asyncHandler(async (req, res) => {
             role: UserRole.LEADER,
             canCreateGroup: false,
             isGroupJoined: true,
+            canEditNoticeBoard: true,
+        },
+    });
+
+    const createdNotice = await db.notice_board_details.create({
+        data: {
+            board_text: "New Notice",
+            studentId: user_id,
+            groupId: newGroup.id,
+        },
+    });
+
+    await db.notice_board_audit_log.create({
+        data: {
+            noticeBoardId: createdNotice.id,
+            actionType: "CREATED",
+            newText: "New Notice",
+            performedById: user_id,
         },
     });
 
@@ -92,6 +110,40 @@ export const getAllGroupMembers = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 { groupMembers },
+                "Fetched All Group Members Successfully",
+            ),
+        );
+});
+
+export const removeGroupMember = asyncHandler(async (req, res) => {
+    const studentId = req.user.id;
+    const { groupId } = req.params;
+
+    const request = await db.group_joining_request_details.findFirst({
+        where: {
+            studentId: studentId,
+            groupId: groupId,
+        },
+    });
+
+    console.log(request);
+
+    const group = await db.student_group_mapping_details.findUnique({
+        where: {
+            studentId_groupId: {
+                studentId: studentId,
+                groupId: groupId,
+            },
+        },
+    });
+    console.log(group);
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { request, group },
                 "Fetched All Group Members Successfully",
             ),
         );

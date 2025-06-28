@@ -26,6 +26,12 @@ enum RequestStatus {
   WITHDRAWAL
 }
 
+enum AuditAction {
+  CREATED
+  UPDATED
+  DELETED
+}
+
 model super_admin {
   id           String   @id @default(uuid())
   username     String   @unique
@@ -62,10 +68,9 @@ model student_details {
   tweeter_link              String?
   refreshToken              String?
   accessToken               String?
-  emailVerificationToken    String?
-  emailVerificationExpiry   DateTime?
   canCreateGroup            Boolean   @default(true)
   isGroupJoined             Boolean   @default(false)
+  canEditNoticeBoard        Boolean   @default(false)
   forgotPasswordToken       String?
   forgotPasswordTokenExpiry DateTime?
   createdAt                 DateTime  @default(now())
@@ -76,6 +81,7 @@ model student_details {
   student_group_mapping_details  student_group_mapping_details[]
   student_cohort_mapping_details student_cohort_mapping_details[]
   group_joining_request_details  group_joining_request_details[]
+  notice_board_audit_log         notice_board_audit_log[]
 }
 
 model group_details {
@@ -98,11 +104,25 @@ model notice_board_details {
   board_text String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  student_Id String
-  group_Id   String
+  studentId  String
+  groupId    String
 
-  createdBy student_details @relation(fields: [student_Id], references: [id], onDelete: Cascade)
-  group     group_details   @relation(fields: [group_Id], references: [id], onDelete: Cascade)
+  createdBy              student_details          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group                  group_details            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  notice_board_audit_log notice_board_audit_log[]
+}
+
+model notice_board_audit_log {
+  id            String      @id @default(uuid())
+  noticeBoardId String
+  actionType    AuditAction
+  previousText  String?
+  newText       String?
+  performedById String
+  performedOn   DateTime    @default(now())
+
+  noticeBoard notice_board_details @relation(fields: [noticeBoardId], references: [id], onDelete: Cascade)
+  performedBy student_details      @relation(fields: [performedById], references: [id], onDelete: Cascade)
 }
 
 model student_group_mapping_details {
