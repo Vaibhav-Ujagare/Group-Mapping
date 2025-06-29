@@ -32,6 +32,14 @@ enum AuditAction {
   DELETED
 }
 
+enum GroupAuditAction {
+  CREATED
+  UPDATED
+  REMOVED
+  JOINED
+  LEFT
+}
+
 model super_admin {
   id           String   @id @default(uuid())
   username     String   @unique
@@ -82,6 +90,7 @@ model student_details {
   student_cohort_mapping_details student_cohort_mapping_details[]
   group_joining_request_details  group_joining_request_details[]
   notice_board_audit_log         notice_board_audit_log[]
+  group_details_audit            group_details_audit[]
 }
 
 model group_details {
@@ -97,6 +106,7 @@ model group_details {
   notice_board_details          notice_board_details[]
   student_group_mapping_details student_group_mapping_details[]
   group_joining_request_details group_joining_request_details[]
+  group_details_audit           group_details_audit[]
 }
 
 model notice_board_details {
@@ -131,7 +141,8 @@ model student_group_mapping_details {
   studentId      String
   joining_date   DateTime?
   leaving_date   DateTime?
-  removed_reason DateTime?
+  leaving_reason String?
+  removed_reason String?
   removed_date   DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -171,4 +182,16 @@ model group_joining_request_details {
   group   group_details   @relation(fields: [groupId], references: [id])
 
   @@unique([studentId, groupId])
+}
+
+model group_details_audit {
+  id         String           @id @default(uuid())
+  groupId    String
+  studentId  String
+  createdAt  DateTime         @default(now())
+  remarks    String?
+  actionType GroupAuditAction
+
+  group   group_details   @relation(fields: [groupId], references: [id])
+  student student_details @relation(fields: [studentId], references: [id])
 }

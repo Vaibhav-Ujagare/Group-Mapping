@@ -98,6 +98,7 @@ export const getAllGroupMembers = asyncHandler(async (req, res) => {
     const groupMembers = await db.student_group_mapping_details.findMany({
         where: {
             groupId: groupId,
+            leaving_reason: null,
         },
         include: {
             student: true,
@@ -116,35 +117,143 @@ export const getAllGroupMembers = asyncHandler(async (req, res) => {
 });
 
 export const removeGroupMember = asyncHandler(async (req, res) => {
-    const studentId = req.user.id;
-    const { groupId } = req.params;
+    const { groupId, studentId, note } = req.body;
 
-    const request = await db.group_joining_request_details.findFirst({
-        where: {
-            studentId: studentId,
-            groupId: groupId,
-        },
-    });
+    if (!groupId) {
+        throw new ApiError(400, "Group Not Found");
+    }
 
-    console.log(request);
+    if (!note) {
+        throw new ApiError(400, "Please add remove note");
+    }
 
-    const group = await db.student_group_mapping_details.findUnique({
+    const group = await db.student_group_mapping_details.update({
         where: {
             studentId_groupId: {
                 studentId: studentId,
                 groupId: groupId,
             },
         },
+        data: {
+            removed_reason: note,
+            removed_date: new Date(Date.now()),
+        },
     });
+
     console.log(group);
+
+    await db.student_details.update({
+        where: { id: studentId },
+        data: {
+            isGroupJoined: false,
+            canCreateGroup: true,
+        },
+    });
 
     return res
         .status(201)
         .json(
             new ApiResponse(
                 200,
-                { request, group },
-                "Fetched All Group Members Successfully",
+                { group },
+                `Remove Members From Group Successfully`,
+            ),
+        );
+});
+
+export const leaveGroup = asyncHandler(async (req, res) => {
+    const { note, groupId } = req.body;
+    const studentId = req.user.id;
+
+    if (!note) {
+        throw new ApiError(400, "Please add leaving note");
+    }
+
+    if (!groupId || !studentId) {
+        throw new ApiError(400, "Mission User of Group ID");
+    }
+
+    const mapping = await db.student_group_mapping_details.update({
+        where: {
+            studentId_groupId: {
+                studentId,
+                groupId,
+            },
+        },
+        data: {
+            leaving_reason: note,
+            leaving_date: new Date(Date.now()),
+        },
+    });
+
+    await db.student_details.update({
+        where: { id: studentId },
+        data: {
+            isGroupJoined: false,
+            canCreateGroup: true,
+        },
+    });
+
+    return res.status(200).json({
+        message: "Successfully left the group",
+        data: mapping,
+    });
+});
+
+export const deleteGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.body;
+    const studentId = req.user.id;
+
+    const groupMembers = await db.student_group_mapping_details.findMany({
+        where: {
+            groupId: groupId,
+            leaving_reason: null,
+        },
+        include: {
+            student: true,
+        },
+    });
+
+    // if (groupMembers.length === 1) {
+    //     if (groupMembers[0].student.role == "LEADER") {
+    //         await db.student_group_mapping_details.update({
+    //             where: {
+    //                 studentId_groupId: {
+    //                     studentId: studentId,
+    //                     groupId: groupId,
+    //                 },
+    //             },
+    //             data: {
+    //                 removed_reason: "deleting group",
+    //                 removed_date: new Date(Date.now()),
+    //             },
+    //         });
+
+    //         await db.student_details.update({
+    //             where: {
+    //                 id: studentId,
+    //             },
+    //             data: {
+    //                 role: UserRole.MEMBER,
+    //                 canCreateGroup: true,
+    //                 isGroupJoined: false,
+    //                 canEditNoticeBoard: false,
+    //             },
+    //         });
+    //     }
+    // }
+
+    // if (groupMembers.length > 0) {
+    //     throw new ApiError(400, "You can not delete this group");
+    // }
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { groupMembers },
+                "Group Deleted Successfully",
             ),
         );
 });

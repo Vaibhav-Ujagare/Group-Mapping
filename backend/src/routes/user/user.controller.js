@@ -184,7 +184,6 @@ export const getAllJoiningRequests = asyncHandler(async (req, res) => {
             groupId: true,
         },
     });
-    console.log(group);
     if (!group) {
         throw new ApiError(400, "You have not create any group");
     }
@@ -192,8 +191,10 @@ export const getAllJoiningRequests = asyncHandler(async (req, res) => {
     const groupRequests = await db.group_joining_request_details.findMany({
         where: {
             groupId: group.groupId,
+            status: "REQUESTED",
         },
     });
+
     if (groupRequests.length === 0) {
         return res
             .status(201)
@@ -274,3 +275,5 @@ export const handleRequest = asyncHandler(async (req, res) => {
         .status(201)
         .json(new ApiResponse(200, { request }, `Request ${action} `));
 });
+
+
