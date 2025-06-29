@@ -214,38 +214,38 @@ export const deleteGroup = asyncHandler(async (req, res) => {
         },
     });
 
-    // if (groupMembers.length === 1) {
-    //     if (groupMembers[0].student.role == "LEADER") {
-    //         await db.student_group_mapping_details.update({
-    //             where: {
-    //                 studentId_groupId: {
-    //                     studentId: studentId,
-    //                     groupId: groupId,
-    //                 },
-    //             },
-    //             data: {
-    //                 removed_reason: "deleting group",
-    //                 removed_date: new Date(Date.now()),
-    //             },
-    //         });
+    if (groupMembers.length === 1) {
+        if (groupMembers[0].student.role == "LEADER") {
+            await db.student_group_mapping_details.update({
+                where: {
+                    studentId_groupId: {
+                        studentId: studentId,
+                        groupId: groupId,
+                    },
+                },
+                data: {
+                    removed_reason: "deleting group",
+                    removed_date: new Date(Date.now()),
+                },
+            });
 
-    //         await db.student_details.update({
-    //             where: {
-    //                 id: studentId,
-    //             },
-    //             data: {
-    //                 role: UserRole.MEMBER,
-    //                 canCreateGroup: true,
-    //                 isGroupJoined: false,
-    //                 canEditNoticeBoard: false,
-    //             },
-    //         });
-    //     }
-    // }
+            await db.student_details.update({
+                where: {
+                    id: studentId,
+                },
+                data: {
+                    role: UserRole.MEMBER,
+                    canCreateGroup: true,
+                    isGroupJoined: false,
+                    canEditNoticeBoard: false,
+                },
+            });
+        }
+    }
 
-    // if (groupMembers.length > 0) {
-    //     throw new ApiError(400, "You can not delete this group");
-    // }
+    if (groupMembers.length > 0) {
+        throw new ApiError(400, "You can not delete this group");
+    }
 
     return res
         .status(201)
