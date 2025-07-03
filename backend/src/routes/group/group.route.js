@@ -6,6 +6,8 @@ import {
     getAllGroups,
     leaveGroup,
     removeGroupMember,
+    getGroupHistory,
+    getGroupProfile,
 } from "./group.controller.js";
 import { isLoggedIn } from "../../middleware/auth.middleware.js";
 
@@ -13,9 +15,13 @@ const groupRoute = Router();
 
 groupRoute.post("/create", isLoggedIn, createGroup);
 
-groupRoute.get("/all-groups", isLoggedIn, getAllGroups);
+groupRoute.get("/all-groups", getAllGroups);
 
 groupRoute.get("/:groupId/group-members", isLoggedIn, getAllGroupMembers);
+
+groupRoute.get("/:groupId", isLoggedIn, getGroupProfile);
+
+groupRoute.get("/:groupId/group-history", isLoggedIn, getGroupHistory);
 
 groupRoute.post("/remove-member", isLoggedIn, removeGroupMember);
 

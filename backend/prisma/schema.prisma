@@ -30,11 +30,6 @@ enum AuditAction {
   CREATED
   UPDATED
   DELETED
-}
-
-enum GroupAuditAction {
-  CREATED
-  UPDATED
   REMOVED
   JOINED
   LEFT
@@ -90,7 +85,7 @@ model student_details {
   student_cohort_mapping_details student_cohort_mapping_details[]
   group_joining_request_details  group_joining_request_details[]
   notice_board_audit_log         notice_board_audit_log[]
-  group_details_audit            group_details_audit[]
+  group_user_audit_log           group_user_audit_log[]
 }
 
 model group_details {
@@ -106,7 +101,7 @@ model group_details {
   notice_board_details          notice_board_details[]
   student_group_mapping_details student_group_mapping_details[]
   group_joining_request_details group_joining_request_details[]
-  group_details_audit           group_details_audit[]
+  group_user_audit_log          group_user_audit_log[]
 }
 
 model notice_board_details {
@@ -178,20 +173,22 @@ model group_joining_request_details {
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
-  student student_details @relation(fields: [studentId], references: [id])
-  group   group_details   @relation(fields: [groupId], references: [id])
+  student student_details @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group   group_details   @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, groupId])
 }
 
-model group_details_audit {
-  id         String           @id @default(uuid())
+model group_user_audit_log {
+  id         String      @id @default(uuid())
   groupId    String
   studentId  String
-  createdAt  DateTime         @default(now())
+  createdAt  DateTime    @default(now())
   remarks    String?
-  actionType GroupAuditAction
+  actionType AuditAction
 
-  group   group_details   @relation(fields: [groupId], references: [id])
-  student student_details @relation(fields: [studentId], references: [id])
+  group   group_details   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student student_details @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // @@unique([groupId, studentId])
 }

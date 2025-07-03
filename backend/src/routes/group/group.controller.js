@@ -2,7 +2,7 @@ import { db } from "../../db/dbConnection.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { UserRole } from "../../generated/prisma/index.js";
+import { UserRole, AuditAction } from "../../generated/prisma/index.js";
 
 export const createGroup = asyncHandler(async (req, res) => {
     const { name, description } = req.body;
@@ -14,6 +14,7 @@ export const createGroup = asyncHandler(async (req, res) => {
         },
     });
 
+    console.log(user.email);
     if (!user.canCreateGroup) {
         throw new ApiError(400, "You already create group or part of group");
     }
@@ -65,6 +66,15 @@ export const createGroup = asyncHandler(async (req, res) => {
         },
     });
 
+    await db.group_user_audit_log.create({
+        data: {
+            groupId: newGroup.id,
+            studentId: user_id,
+            actionType: AuditAction.CREATED,
+            remarks: `${user.email} has created ${name} group`,
+        },
+    });
+
     return res
         .status(201)
         .json(new ApiResponse(200, newGroup, "Group Created Successfully"));
@@ -99,6 +109,7 @@ export const getAllGroupMembers = asyncHandler(async (req, res) => {
         where: {
             groupId: groupId,
             leaving_reason: null,
+            removed_reason: null,
         },
         include: {
             student: true,
@@ -140,13 +151,20 @@ export const removeGroupMember = asyncHandler(async (req, res) => {
         },
     });
 
-    console.log(group);
-
     await db.student_details.update({
         where: { id: studentId },
         data: {
             isGroupJoined: false,
             canCreateGroup: true,
+        },
+    });
+
+    await db.group_user_audit_log.create({
+        data: {
+            groupId: groupId,
+            studentId: studentId,
+            actionType: AuditAction.REMOVED,
+            remarks: `${studentId} has removed ${groupId} group`,
         },
     });
 
@@ -191,6 +209,15 @@ export const leaveGroup = asyncHandler(async (req, res) => {
         data: {
             isGroupJoined: false,
             canCreateGroup: true,
+        },
+    });
+
+    await db.group_user_audit_log.create({
+        data: {
+            groupId: groupId,
+            studentId: studentId,
+            actionType: AuditAction.LEFT,
+            remarks: `${studentId} has left the group`,
         },
     });
 
@@ -240,10 +267,19 @@ export const deleteGroup = asyncHandler(async (req, res) => {
                     canEditNoticeBoard: false,
                 },
             });
+
+            await db.group_user_audit_log.create({
+                data: {
+                    groupId: groupId,
+                    studentId: studentId,
+                    actionType: AuditAction.REMOVED,
+                    remarks: `${studentId} has removed from the group`,
+                },
+            });
         }
     }
 
-    if (groupMembers.length > 0) {
+    if (groupMembers.length > 1) {
         throw new ApiError(400, "You can not delete this group");
     }
 
@@ -254,6 +290,46 @@ export const deleteGroup = asyncHandler(async (req, res) => {
                 200,
                 { groupMembers },
                 "Group Deleted Successfully",
+            ),
+        );
+});
+
+export const getGroupHistory = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+
+    const groupHistory = await db.group_user_audit_log.findMany({
+        where: {
+            groupId: groupId,
+        },
+    });
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { groupHistory },
+                `Group History Fetched Successfully `,
+            ),
+        );
+});
+
+export const getGroupProfile = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+
+    const group = db.group_details.findMany({
+        where: {
+            id: groupId,
+        },
+    });
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { group },
+                `Group Details Fetched Successfully`,
             ),
         );
 });

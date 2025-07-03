@@ -4,6 +4,7 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { RequestStatus } from "../../generated/prisma/index.js";
+import { AuditAction } from "../../generated/prisma/index.js";
 
 import bcrypt from "bcryptjs";
 
@@ -119,6 +120,30 @@ export const selectCohort = asyncHandler(async (req, res) => {
     return res
         .status(201)
         .json(new ApiResponse(200, {}, "Cohort Select Successfully"));
+});
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+    const users = db.student_details.findMany({});
+
+    return res
+        .status(201)
+        .json(new ApiResponse(200, { users }, `All User Fetched Successfully`));
+});
+
+export const getUserProfile = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    const user = db.student_details.findMany({
+        where: {
+            id: userId,
+        },
+    });
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(200, { user }, `User Details Fetched Successfully`),
+        );
 });
 
 export const sendJoiningRequest = asyncHandler(async (req, res) => {
@@ -257,6 +282,15 @@ export const handleRequest = asyncHandler(async (req, res) => {
                 isGroupJoined: true,
             },
         });
+
+        await db.group_user_audit_log.create({
+            data: {
+                groupId: request.groupId,
+                studentId: request.studentId,
+                actionType: AuditAction.JOINED,
+                remarks: `${request.studentId} has joined group`,
+            },
+        });
     }
 
     if (action === "REJECTED") {
@@ -276,4 +310,22 @@ export const handleRequest = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, { request }, `Request ${action} `));
 });
 
+export const getUserHistory = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
 
+    const userHistory = await db.group_user_audit_log.findMany({
+        where: {
+            studentId: userId,
+        },
+    });
+
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { userHistory },
+                `User History Fetched Successfully `,
+            ),
+        );
+});

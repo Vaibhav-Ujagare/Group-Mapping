@@ -9,7 +9,6 @@ adminRoute.post("/login", adminLogin);
 
 adminRoute.post(
     "/upload",
-    isSuperAdmin,
     upload.fields([
         {
             name: "cohort_data",
