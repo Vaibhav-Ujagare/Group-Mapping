@@ -5,10 +5,10 @@ import toast from "react-hot-toast";
 export const useGroupStore = create((set) => ({
   allGroups: [],
   allGroupMembers: [],
-  groupProfile: [],
+  groupProfile: null,
   groupHistory: [],
-  removeMember: [],
-  leavingMember: [],
+  removeMember: null,
+  leavingMember: null,
   isMemberLeaving: false,
   isGroupCreating: false,
   isGroupDeleting: false,
@@ -70,7 +70,7 @@ export const useGroupStore = create((set) => ({
       set({ groupProfile: res.data });
     } catch (error) {
       console.log("❌ Error While fetching group profile:", error);
-      set({ groupProfile: [] });
+      set({ groupProfile: null });
     } finally {
       set({ isFetchingMembers: false });
     }
@@ -98,13 +98,13 @@ export const useGroupStore = create((set) => ({
       set({ removeMember: res.data });
     } catch (error) {
       console.log("❌ Error While Rmoving Group Member:", error);
-      set({ removeMember: [] });
+      set({ removeMember: null });
     } finally {
       set({ isRemovingMember: false });
     }
   },
 
-  removeGroupMember: async (data) => {
+  leavingGroupMember: async (data) => {
     set({ isMemberLeaving: true });
     try {
       const res = await axiosInstance.post(`/group/leave`, data);
@@ -112,13 +112,13 @@ export const useGroupStore = create((set) => ({
       set({ leavingMember: res.data });
     } catch (error) {
       console.log("❌ Error While Leaving Group Member:", error);
-      set({ leavingMember: [] });
+      set({ leavingMember: null });
     } finally {
       set({ isMemberLeaving: false });
     }
   },
 
-  removeGroupMember: async (data) => {
+  deletGroup: async (data) => {
     set({ isGroupDeleting: true });
     try {
       const res = await axiosInstance.post(`/group/delete-group`, data);

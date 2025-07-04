@@ -3,48 +3,34 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 export const useAdminAuthStore = create((set) => ({
-  authUser: null,
-  isSigninUp: false,
+  adminUser: null,
   isLoggingIn: false,
-  isCheckingAuth: false,
+  isUploadingCSV: false,
+  isDataLoading: false,
+  csvData: null,
+  isCheckingAdmin: false,
 
-  checkAuth: async () => {
-    set({ isCheckingAuth: true });
+  checkAdmin: async () => {
+    set({ isCheckingAdmin: true });
     try {
-      const res = await axiosInstance.get("/auth/check");
+      const res = await axiosInstance.get("/admin/check");
       console.log("checkauth response", res.data);
 
-      set({ authUser: res.data.user });
+      set({ adminUser: res.data.user });
     } catch (error) {
       console.log("❌ Error checking auth:", error);
-      set({ authUser: null });
+      set({ adminUser: null });
     } finally {
-      set({ isCheckingAuth: false });
-    }
-  },
-
-  signup: async (data) => {
-    set({ isSigninUp: true });
-    try {
-      const res = await axiosInstance.post("/auth/register", data);
-
-      set({ authUser: res.data.user });
-
-      toast.success(res.data.message);
-    } catch (error) {
-      console.log("Error signing up", error);
-      toast.error("Error signing up");
-    } finally {
-      set({ isSigninUp: false });
+      set({ isCheckingAdmin: false });
     }
   },
 
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/login", data);
+      const res = await axiosInstance.post("/admin/login", data);
 
-      set({ authUser: res.data.user });
+      set({ adminUser: res.data.user });
 
       toast.success(res.data.message);
     } catch (error) {
@@ -55,10 +41,48 @@ export const useAdminAuthStore = create((set) => ({
     }
   },
 
+  uploadCSV: async (file) => {
+    set({ isUploadingCSV: true });
+
+    const formData = new FormData();
+    formData.append("cohort_data", file);
+
+    try {
+      const res = await axiosInstance.post("/admin/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success(res.data.message || "CSV uploaded successfully");
+    } catch (error) {
+      console.error("❌ Error uploading cohort CSV:", error);
+      toast.error(error?.response?.data?.message || "CSV upload failed");
+    } finally {
+      set({ isUploadingCSV: false });
+    }
+  },
+
+  showCSVData: async () => {
+    set({ isDataLoading: true });
+    try {
+      const res = await axiosInstance.get("/auth/student-data");
+      console.log(res.data);
+      set({ csvData: res.data });
+      toast.success("CSV Data Load successfully");
+    } catch (error) {
+      console.log("Error while loading CSV data", error);
+      toast.error("Error logging out");
+      set({ csvData: null });
+    } finally {
+      set({ isDataLoading: false });
+    }
+  },
+
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-      set({ authUser: null });
+      set({ adminUser: null });
 
       toast.success("Logout successful");
     } catch (error) {
