@@ -9,6 +9,8 @@ import {
     getUserHistory,
     getUserProfile,
     getAllUsers,
+    check,
+    logoutUser,
 } from "./user.controller.js";
 
 const userRoute = Router();
@@ -28,5 +30,9 @@ userRoute.get("/:userId/history", isLoggedIn, getUserHistory);
 userRoute.get("/all-users", isLoggedIn, getAllUsers);
 
 userRoute.post("/handle-request", isLoggedIn, handleRequest);
+
+userRoute.post("/logout", isLoggedIn, logoutUser);
+
+userRoute.get("/check", isLoggedIn, check);
 
 export default userRoute;

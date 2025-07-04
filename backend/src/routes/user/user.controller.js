@@ -329,3 +329,40 @@ export const getUserHistory = asyncHandler(async (req, res) => {
             ),
         );
 });
+
+export const logoutUser = asyncHandler(async (req, res) => {
+    await db.student_details.update({
+        where: { id: req.user.id }, // assuming req.user.id is the correct field
+        data: {
+            refreshToken: null,
+        },
+    });
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+        path: "/", // ensure it applies site-wide
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
+        .json(new ApiResponse(200, {}, "User Logged Out!"));
+});
+
+export const check = async (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            message: "User authenticated successfully",
+            user: req.user,
+        });
+    } catch (error) {
+        console.error("Error checking user:", error);
+        res.status(500).json({
+            error: "Error checking user",
+        });
+    }
+};
