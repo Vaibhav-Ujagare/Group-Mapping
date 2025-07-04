@@ -14,10 +14,6 @@ const GroupList = ({ groups }) => {
     setSelectedGroup(group);
   };
 
-  const handleCloseModal = () => {
-    setSelectedGroup(null);
-  };
-
   const handleCreateGroup = async (data) => {
     await createGroup(data);
   };
@@ -86,7 +82,10 @@ const GroupList = ({ groups }) => {
         </div>
 
         {/* Show Modal if selected */}
-        <GroupModal group={selectedGroup} onClose={handleCloseModal} />
+        <GroupModal
+          group={selectedGroup}
+          onClose={() => setSelectedGroup(null)}
+        />
       </div>
       <CreateGroup
         isOpen={isCreateModalOpen}

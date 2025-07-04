@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const { authUser, isLoggingIn, login } = useAuthStore();
+  const { authUser, login } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+  const [isStudent, setIsStudent] = useState(true);
   const navigation = useNavigate();
 
   const {
@@ -32,10 +33,32 @@ const LoginPage = () => {
       console.error("Signup failed", error);
     }
   };
+
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center px-4">
-      <div className="w-full max-w-md p-8 space-y-4 rounded-lg shadow-lg border ">
-        <h2 className="text-white text-center text-2xl">LOGIN</h2>
+      <div className="w-full max-w-md p-8 space-y-6 rounded-lg shadow-lg border bg-base-100">
+        <h2 className="text-white text-center text-2xl">
+          Login as {isStudent ? "Student" : "Admin"}
+        </h2>
+
+        {/* Toggle Buttons */}
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => setIsStudent(true)}
+            className={`btn ${isStudent ? "btn-primary" : "btn-outline"}`}
+          >
+            Student
+          </button>
+          <button
+            onClick={() => setIsStudent(false)}
+            className={`btn ${!isStudent ? "btn-primary" : "btn-outline"}`}
+          >
+            Admin
+          </button>
+        </div>
+
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="label">
@@ -61,6 +84,7 @@ const LoginPage = () => {
               )}
             </div>
           </div>
+
           <div>
             <label className="label">
               <span className="label-text">Password</span>
@@ -69,7 +93,7 @@ const LoginPage = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`input input-bordered w-full pl-10 ${
+                className={`input input-bordered w-full pl-4 pr-10 ${
                   errors.password ? "input-error" : ""
                 }`}
                 placeholder="•••••••••••"
@@ -88,6 +112,7 @@ const LoginPage = () => {
               </button>
             </div>
           </div>
+
           <div className="flex justify-between items-center">
             <label className="cursor-pointer label">
               <input type="checkbox" className="checkbox checkbox-sm" />
@@ -97,6 +122,7 @@ const LoginPage = () => {
               Forgot Password?
             </a>
           </div>
+
           <button
             disabled={isLoggingIn}
             type="submit"
@@ -105,21 +131,13 @@ const LoginPage = () => {
             {isLoggingIn ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Loading...
+                Logging in...
               </>
             ) : (
-              "Login"
+              `Login as ${isStudent ? "Student" : "Admin"}`
             )}
           </button>
         </form>
-        <div className="text-center">
-          <p className="text-base-content/60">
-            Don't have an account?{" "}
-            <Link to="/signup" className="link link-primary">
-              Sign up
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );
