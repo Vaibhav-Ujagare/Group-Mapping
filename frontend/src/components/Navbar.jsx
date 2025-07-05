@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { LogOut } from "lucide-react";
 import LogoutButton from "./LogoutButton";
+import { useAdminAuthStore } from "../store/useAdminAuthStore";
 
 const Navbar = () => {
-  const { authUser } = useAuthStore();
+  const { authUser, userRole } = useAuthStore();
+  const { adminLogin, adminRole } = useAdminAuthStore();
 
-  if (authUser) {
+  if (authUser || adminLogin) {
     return (
       <div className="navbar bg-base-300 shadow-md">
         <div className="flex-1">
@@ -16,7 +18,10 @@ const Navbar = () => {
         </div>
 
         <div className="flex-none space-x-2">
-          <LogoutButton className="hover:bg-primary hover:text-white">
+          <LogoutButton
+            role={adminRole || userRole}
+            className="hover:bg-primary hover:text-white"
+          >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </LogoutButton>
@@ -24,6 +29,7 @@ const Navbar = () => {
       </div>
     );
   }
+
   return (
     <div className="navbar bg-base-300 shadow-md">
       <div className="flex-1">

@@ -5,9 +5,11 @@ import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAdminAuthStore } from "../store/useAdminAuthStore";
 
 const LoginPage = () => {
-  const { authUser, login } = useAuthStore();
+  const { authUser, isLoggingIn, login } = useAuthStore();
+  const { adminUser, isAdminLoggingIn, adminLogin } = useAdminAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isStudent, setIsStudent] = useState(true);
   const navigation = useNavigate();
@@ -21,20 +23,29 @@ const LoginPage = () => {
   });
 
   useEffect(() => {
-    if (authUser) navigation("/");
-  }, [authUser, login]);
+    if (authUser) {
+      navigation("/", { replace: true });
+    }
+  }, [authUser]);
+
+  useEffect(() => {
+    if (adminUser) {
+      navigation("/admin", { replace: true });
+    }
+  }, [adminUser]);
 
   const onSubmit = async (data) => {
     try {
-      await login(data);
-      console.log(data);
-      navigation("/");
+      if (isStudent) {
+        await login(data);
+      } else {
+        await adminLogin(data);
+      }
+      // NO navigation here
     } catch (error) {
-      console.error("Signup failed", error);
+      console.error("Login failed", error);
     }
   };
-
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center px-4">
@@ -64,10 +75,11 @@ const LoginPage = () => {
             <label className="label">
               <span className="label-text">Email</span>
             </label>
-            <div className="relative">
+            <div className="relative mt-2">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-base-content/40" />
+                <Mail className="h-5 w-5 text-base-content/40 " />
               </div>
+
               <input
                 type="email"
                 {...register("email")}
@@ -77,6 +89,7 @@ const LoginPage = () => {
                 placeholder="example@mail.com"
                 required
               />
+
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.email.message}
@@ -89,7 +102,7 @@ const LoginPage = () => {
             <label className="label">
               <span className="label-text">Password</span>
             </label>
-            <div className="relative">
+            <div className="relative mt-2">
               <input
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
@@ -114,21 +127,17 @@ const LoginPage = () => {
           </div>
 
           <div className="flex justify-between items-center">
-            <label className="cursor-pointer label">
-              <input type="checkbox" className="checkbox checkbox-sm" />
-              <span className="ml-2 text-sm">Remember me</span>
-            </label>
             <a href="#" className="text-sm text-blue-500 hover:underline">
               Forgot Password?
             </a>
           </div>
 
           <button
-            disabled={isLoggingIn}
+            disabled={isLoggingIn || isAdminLoggingIn}
             type="submit"
             className="btn btn-primary w-full"
           >
-            {isLoggingIn ? (
+            {isLoggingIn || isAdminLoggingIn ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Logging in...

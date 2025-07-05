@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
     adminLogin,
     check,
+    logoutUser,
     showCSVData,
     uploadCSV,
 } from "./admin.controller.js";
@@ -26,6 +27,8 @@ adminRoute.post(
 
 adminRoute.get("/student-data", showCSVData);
 
-adminRoute.get("/check", check);
+adminRoute.get("/check", isSuperAdmin, check);
+
+adminRoute.post("/logout", isSuperAdmin, logoutUser);
 
 export default adminRoute;

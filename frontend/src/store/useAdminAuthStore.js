@@ -4,19 +4,20 @@ import toast from "react-hot-toast";
 
 export const useAdminAuthStore = create((set) => ({
   adminUser: null,
-  isLoggingIn: false,
+  isAdminLoggingIn: false,
   isUploadingCSV: false,
   isDataLoading: false,
-  csvData: null,
+  isCSVUploadSuccessfully: false,
+  csvData: [],
   isCheckingAdmin: false,
+  adminRole: null,
 
   checkAdmin: async () => {
     set({ isCheckingAdmin: true });
     try {
       const res = await axiosInstance.get("/admin/check");
       console.log("checkauth response", res.data);
-
-      set({ adminUser: res.data.user });
+      set({ adminUser: res.data.user, adminRole: "ADMIN" });
     } catch (error) {
       console.log("❌ Error checking auth:", error);
       set({ adminUser: null });
@@ -25,24 +26,25 @@ export const useAdminAuthStore = create((set) => ({
     }
   },
 
-  login: async (data) => {
-    set({ isLoggingIn: true });
+  adminLogin: async (data) => {
+    console.log(data);
+    set({ isAdminLoggingIn: true });
     try {
       const res = await axiosInstance.post("/admin/login", data);
 
-      set({ adminUser: res.data.user });
+      set({ adminUser: res.data.user, adminRole: "ADMIN" });
 
       toast.success(res.data.message);
     } catch (error) {
       console.log("Error logging in", error);
       toast.error("Error logging in");
     } finally {
-      set({ isLoggingIn: false });
+      set({ isAdminLoggingIn: false });
     }
   },
 
   uploadCSV: async (file) => {
-    set({ isUploadingCSV: true });
+    set({ isUploadingCSV: true, isCSVUploadSuccessfully: false });
 
     const formData = new FormData();
     formData.append("cohort_data", file);
@@ -55,6 +57,7 @@ export const useAdminAuthStore = create((set) => ({
       });
 
       toast.success(res.data.message || "CSV uploaded successfully");
+      set({ isCSVUploadSuccessfully: true });
     } catch (error) {
       console.error("❌ Error uploading cohort CSV:", error);
       toast.error(error?.response?.data?.message || "CSV upload failed");
@@ -66,24 +69,23 @@ export const useAdminAuthStore = create((set) => ({
   showCSVData: async () => {
     set({ isDataLoading: true });
     try {
-      const res = await axiosInstance.get("/auth/student-data");
+      const res = await axiosInstance.get("/admin/student-data");
       console.log(res.data);
-      set({ csvData: res.data });
+      set({ csvData: res.data.data });
       toast.success("CSV Data Load successfully");
     } catch (error) {
       console.log("Error while loading CSV data", error);
       toast.error("Error logging out");
-      set({ csvData: null });
+      set({ csvData: [] });
     } finally {
       set({ isDataLoading: false });
     }
   },
 
-  logout: async () => {
+  adminLogout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
+      await axiosInstance.post("/admin/logout");
       set({ adminUser: null });
-
       toast.success("Logout successful");
     } catch (error) {
       console.log("Error logging out", error);

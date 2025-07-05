@@ -37,7 +37,7 @@ enum AuditAction {
 
 model super_admin {
   id           String   @id @default(uuid())
-  username     String   @unique
+  email        String   @unique
   password     String
   refreshToken String?
   accessToken  String?

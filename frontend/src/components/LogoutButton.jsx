@@ -1,10 +1,24 @@
+import { useAdminAuthStore } from "../store/useAdminAuthStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
-const LogoutButton = ({ children }) => {
+const LogoutButton = ({ role, children }) => {
   const { logout } = useAuthStore();
+  const { adminLogout } = useAdminAuthStore();
+  const navigate = useNavigate();
 
   const onLogout = async () => {
-    await logout();
+    try {
+      if (role === "STUDENT") {
+        await logout();
+        navigate("/login", { replace: true });
+      } else {
+        await adminLogout();
+        navigate("/login", { replace: true });
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   return (

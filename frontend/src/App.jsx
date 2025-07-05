@@ -1,6 +1,5 @@
 import LoginPage from "./page/LoginPage";
 import { Route, Navigate, Routes } from "react-router-dom";
-import SignupPage from "./page/SignupPage";
 import HomePage from "./page/HomePage";
 import Footer from "./components/Footer";
 import { useAuthStore } from "./store/useAuthStore";
@@ -8,15 +7,23 @@ import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import Layout from "./Layout/Layout";
 import { Toaster } from "react-hot-toast";
+import { useAdminAuthStore } from "./store/useAdminAuthStore";
+import AdminHomePage from "./page/AdminHomePage";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { checkAdmin, adminUser, isCheckingAdmin, adminLogin } =
+    useAdminAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  if (isCheckingAuth && !authUser) {
+  useEffect(() => {
+    checkAdmin();
+  }, [checkAdmin]);
+
+  if ((isCheckingAuth && !authUser) || (isCheckingAdmin && !adminLogin)) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
@@ -34,14 +41,22 @@ function App() {
           />
         </Route>
 
-        <Route
-          path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-        />
+        <Route path="/admin" element={<Layout />}>
+          <Route
+            index
+            element={adminUser ? <AdminHomePage /> : <Navigate to={"/login"} />}
+          />
+        </Route>
 
         <Route
-          path="/signup"
-          element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
+          path="/login"
+          element={
+            !authUser || !adminUser ? (
+              <LoginPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
         />
       </Routes>
       <Footer />

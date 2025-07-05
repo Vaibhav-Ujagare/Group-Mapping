@@ -23,14 +23,14 @@ export const generateAccessAndRefreshTokens = async (userId) => {
             },
             select: {
                 id: true,
-                username: true,
+                email: true,
             },
         });
 
         const accessToken = jwt.sign(
             {
                 id: user.id,
-                username: user.username,
+                email: user.email,
             },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
@@ -39,7 +39,7 @@ export const generateAccessAndRefreshTokens = async (userId) => {
         const refreshToken = jwt.sign(
             {
                 id: user.id,
-                username: user.username,
+                email: user.email,
             },
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
@@ -60,11 +60,11 @@ export const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 export const adminLogin = asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     try {
         const user = await db.super_admin.findUnique({
             where: {
-                username,
+                email,
             },
         });
 
@@ -191,3 +191,26 @@ export const check = async (req, res) => {
         });
     }
 };
+
+export const logoutUser = asyncHandler(async (req, res) => {
+    console.log("controller reached");
+    await db.super_admin.update({
+        where: { id: req.user.id }, // assuming req.user.id is the correct field
+        data: {
+            refreshToken: null,
+        },
+    });
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+        path: "/", // ensure it applies site-wide
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
+        .json(new ApiResponse(200, {}, "User Logged Out!"));
+});
