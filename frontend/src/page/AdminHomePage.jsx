@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import CsvUploader from "../components/CsvUploader";
 import { useAdminAuthStore } from "../store/useAdminAuthStore";
 import { ArrowDown } from "lucide-react";
+import UserList from "../components/UserList";
 
 const AdminHomePage = () => {
   const { csvData, showCSVData } = useAdminAuthStore();
@@ -18,11 +19,8 @@ const AdminHomePage = () => {
 
       {/* CSV Upload Section */}
       <CsvUploader />
-      {/* 
-      <button className="btn border border-white" onClick={handleShowCSVData}>
-        Show CSV DATA
-      </button> */}
 
+      <UserList />
       {csvData.length > 0 ? (
         <div className="collapse bg-base-100 border border-base-300 mt-4">
           <input type="checkbox" className="peer" />

@@ -19,14 +19,14 @@ const GroupList = ({ groups }) => {
   };
 
   return (
-    <div className="space-y-5  min-w-full">
+    <div className="space-y-5  min-w-full h-[80vh]">
       <button
         className="btn btn-primary justify-end"
         onClick={() => setIsCreateModalOpen(true)}
       >
         Creat Group
       </button>
-      <div className="min-h-screen bg-base-200 px-2 py-2">
+      <div className="h-[70vh] bg-base-200 px-2 py-2">
         {/* Card */}
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-6">Group List</h2>
