@@ -131,9 +131,8 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 export const getUserProfile = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
-
-    const user = db.student_details.findMany({
+    const userId = req.user.id;
+    const user = await db.student_details.findUnique({
         where: {
             id: userId,
         },

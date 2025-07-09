@@ -26,7 +26,7 @@ const GroupList = ({ groups }) => {
       >
         Creat Group
       </button>
-      <div className="h-[70vh] bg-base-200 px-2 py-2">
+      <div className="h-[80vh] bg-base-200 px-2 py-2 overflow-auto">
         {/* Card */}
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-6">Group List</h2>
@@ -35,14 +35,14 @@ const GroupList = ({ groups }) => {
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="card bg-base-100 shadow-md border border-base-200"
+                className="card bg-base-100 shadow-md border border-base-200 "
               >
-                <div className="card-body">
+                <div className="card-body ">
                   <h3 className="card-title text-lg font-semibold">
                     {group.group_name}
                   </h3>
                   <p className="text-sm text-gray-600">{group.group_desc}</p>
-                  <div className="text-sm mt-2">
+                  <div className="text-sm mt-2 space-y-2">
                     <p>
                       <strong>Created By:</strong> {group.createdBy?.id}
                     </p>

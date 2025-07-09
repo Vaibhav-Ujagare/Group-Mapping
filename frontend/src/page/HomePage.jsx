@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import GroupList from "../components/GroupList";
 import { useGroupStore } from "../store/useGroupStore";
-import { Users, User, ArrowDown } from "lucide-react";
-import { useAdminAuthStore } from "../store/useAdminAuthStore";
+import { Users, User } from "lucide-react";
 import UserList from "../components/UserList";
 
 const HomePage = () => {

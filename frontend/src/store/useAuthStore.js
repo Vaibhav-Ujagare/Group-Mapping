@@ -6,17 +6,18 @@ export const useAuthStore = create((set) => ({
   authUser: null,
   isRequesting: false,
   isFetchingRequests: false,
+  isFetchingProfile: false,
   isSigninUp: false,
   isLoggingIn: false,
   isCheckingAuth: false,
   userRole: null,
+  userProfile: [],
   joiningRequests: [],
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
     try {
       const res = await axiosInstance.get("/user/check");
-      console.log("checkauth response", res.data);
 
       set({ authUser: res.data.user, userRole: "STUDENT" });
     } catch (error) {
@@ -88,6 +89,28 @@ export const useAuthStore = create((set) => ({
       toast.error("Failed to Fetch join request");
     } finally {
       set({ isFetchingRequests: false });
+    }
+  },
+
+  getUserProfile: async () => {
+    set({ isFetchingProfile: true });
+    try {
+      const res = await axiosInstance.get(`/user/profile`);
+
+      // Check if user exists
+      if (res.data?.data?.user) {
+        set({ userProfile: res.data.data.user });
+        toast.success("Profile fetched successfully");
+      } else {
+        toast.error("User profile not found");
+        set({ userProfile: null });
+      }
+    } catch (error) {
+      console.error("❌ Error fetching user profile:", error);
+      toast.error("Failed to fetch user profile");
+      set({ userProfile: null });
+    } finally {
+      set({ isFetchingProfile: false });
     }
   },
 }));

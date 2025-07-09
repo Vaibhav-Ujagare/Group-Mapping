@@ -14,7 +14,6 @@ export const createGroup = asyncHandler(async (req, res) => {
         },
     });
 
-    console.log(user.email);
     if (!user.canCreateGroup) {
         throw new ApiError(400, "You already create group or part of group");
     }
@@ -90,8 +89,6 @@ export const getAllGroups = asyncHandler(async (req, res) => {
             },
         },
     });
-
-    console.log(allGroups);
 
     return res
         .status(201)

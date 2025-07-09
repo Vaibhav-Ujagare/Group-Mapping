@@ -21,7 +21,6 @@ export const useGroupStore = create((set) => ({
     set({ isFetchingGroups: true });
     try {
       const res = await axiosInstance.get("/group/all-groups");
-      console.log(" response", res.data);
       toast.success(res.data.message);
       set({ allGroups: res.data.data });
     } catch (error) {

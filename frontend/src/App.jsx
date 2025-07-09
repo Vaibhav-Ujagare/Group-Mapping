@@ -9,6 +9,7 @@ import Layout from "./Layout/Layout";
 import { Toaster } from "react-hot-toast";
 import { useAdminAuthStore } from "./store/useAdminAuthStore";
 import AdminHomePage from "./page/AdminHomePage";
+import ProfilePage from "./page/ProfilePage";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -39,6 +40,7 @@ function App() {
             index
             element={authUser ? <HomePage /> : <Navigate to={"/login"} />}
           />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         <Route path="/admin" element={<Layout />}>
