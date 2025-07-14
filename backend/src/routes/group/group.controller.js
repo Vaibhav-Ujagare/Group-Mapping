@@ -100,8 +100,6 @@ export const getAllGroups = asyncHandler(async (req, res) => {
 export const getAllGroupMembers = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
 
-    console.log(groupId);
-
     const groupMembers = await db.student_group_mapping_details.findMany({
         where: {
             groupId: groupId,

@@ -51,8 +51,7 @@ export const useGroupStore = create((set) => ({
     set({ isFetchingGroups: true });
     try {
       const res = await axiosInstance.get(`/group/${groupId}/group-members`);
-      console.log(res.data);
-      set({ allGroupMembers: res.data });
+      set({ allGroupMembers: res.data.data });
     } catch (error) {
       console.log("❌ Error While fetching group members:", error);
       set({ allGroupMembers: [] });

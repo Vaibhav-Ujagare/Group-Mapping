@@ -11,66 +11,83 @@ const UserList = () => {
   return (
     <div>
       {csvData.length > 0 ? (
-        <div className="collapse bg-base-100 border border-base-300 mt-4 rounded-lg max-h-[80vh] overflow-auto">
+        <div className="collapse bg-white dark:bg-base-100 border border-base-300 mt-4 rounded-xl shadow-md overflow-hidden">
           <input type="checkbox" className="peer" defaultChecked />
-          <div className="collapse-title font-semibold peer-checked:bg-base-200 flex justify-between items-center">
-            <h1>Cohort CSV DATA</h1>
-            <h1>Cohort CSV DATA</h1>
+          <div className="collapse-title font-semibold peer-checked:bg-gray-100 dark:peer-checked:bg-base-200 flex justify-between items-center px-4 py-3 text-lg">
+            <h1 className="text-gray-800 dark:text-gray-100">
+              📊 Cohort CSV Data
+            </h1>
           </div>
 
-          {/* Scrollable Section */}
-          <div className="collapse-content mt-5 overflow-auto max-h-[80vh] pr-2 space-y-2.5">
-            <label className="input">
-              <svg
-                className="h-[1em] opacity-50"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2.5"
-                  fill="none"
-                  stroke="currentColor"
+          {/* Scrollable Content */}
+          <div className="collapse-content mt-4 px-4 pb-6 overflow-auto space-y-4">
+            {/* Search Bar */}
+            <div className="w-full">
+              <label className="input input-bordered flex items-center gap-2 max-w-md mx-auto">
+                <svg
+                  className="w-5 h-5 opacity-60"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
                 >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </g>
-              </svg>
-              <input type="search" className="grow" placeholder="Search" />
-              <kbd className="kbd kbd-sm">⌘</kbd>
-              <kbd className="kbd kbd-sm">K</kbd>
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-auto">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+                  />
+                </svg>
+                <input
+                  type="search"
+                  className="grow"
+                  placeholder="Search users..."
+                />
+                <kbd className="kbd kbd-sm">⌘</kbd>
+                <kbd className="kbd kbd-sm">K</kbd>
+              </label>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {csvData.map((row, index) => (
                 <div
                   key={row.id}
-                  className="card border border-base-300 bg-base-100 shadow-md p-4 rounded-lg"
+                  className="card border border-base-300 bg-base-100 dark:bg-gray-900 hover:shadow-lg transition duration-300 p-5 rounded-xl"
                 >
                   <div className="mb-2">
-                    <h3 className="font-bold text-lg">{row.email}</h3>
-                    <p className="text-sm text-gray-500">
-                      Cohort: {row.cohort_name}
+                    <h3 className="font-semibold text-lg text-primary break-words">
+                      {row.email}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Cohort:{" "}
+                      <span className="font-medium">{row.cohort_name}</span>
                     </p>
                   </div>
-                  <ul className="text-sm mb-4 space-y-1">
+
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 mb-4 space-y-1">
                     <li>
                       <strong>Role:</strong> {row.role}
                     </li>
                     <li>
                       <strong>Can Create Group:</strong>{" "}
-                      {row.canCreateGroup ? "Yes" : "No"}
+                      <span className="font-medium">
+                        {row.canCreateGroup ? "Yes" : "No"}
+                      </span>
                     </li>
                     <li>
                       <strong>Is Group Joined:</strong>{" "}
-                      {row.isGroupJoined ? "Yes" : "No"}
+                      <span className="font-medium">
+                        {row.isGroupJoined ? "Yes" : "No"}
+                      </span>
                     </li>
                   </ul>
-                  <div className="flex gap-2">
-                    <button className="btn btn-outline btn-primary btn-sm">
+
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    <button className="btn btn-outline btn-primary btn-sm w-full sm:w-auto">
                       View Profile
                     </button>
-                    <button className="btn btn-primary btn-sm">
+                    <button className="btn btn-primary btn-sm w-full sm:w-auto">
                       Send Request
                     </button>
                   </div>
@@ -81,7 +98,7 @@ const UserList = () => {
         </div>
       ) : (
         <div className="flex w-full flex-col mt-5">
-          <div className="card bg-base-300 rounded-box grid h-20 place-items-center">
+          <div className="card bg-base-200 text-gray-600 dark:text-gray-300 rounded-box grid h-20 place-items-center">
             NO DATA TO SHOW
           </div>
         </div>

@@ -5,24 +5,14 @@ import { useGroupStore } from "../store/useGroupStore";
 import StatsCard from "../components/StatsCard";
 
 const ProfilePage = () => {
-  const { getUserProfile, userProfile, userRole, allUsers, getAllUsers } =
-    useAuthStore();
+  const { getUserProfile, userProfile, userRole } = useAuthStore();
   const { adminRole } = useAdminAuthStore();
-  const { allGroups, groupList } = useGroupStore();
 
   if (userRole) {
     useEffect(() => {
       getUserProfile();
     }, [getUserProfile]);
   }
-
-  useEffect(() => {
-    groupList();
-  }, [groupList]);
-
-  useEffect(() => {
-    getAllUsers();
-  }, [getAllUsers]);
 
   return (
     <div className="px-4">
@@ -35,10 +25,11 @@ const ProfilePage = () => {
         {adminRole == "ADMIN" ? (
           <div className="h-[50vh] bg-base-200">
             {/* {JSON.stringify(allGroups)} */}
-            <StatsCard
+            <StatsCard />
+            {/* <StatsCard
               userCount={allUsers.length}
               groupCount={allGroups.length}
-            />
+            /> */}
           </div>
         ) : (
           <div className="space-y-2">

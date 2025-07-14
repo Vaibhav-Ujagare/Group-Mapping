@@ -368,7 +368,6 @@ export const check = async (req, res) => {
             user: req.user,
         });
     } catch (error) {
-        console.error("Error checking user:", error);
         res.status(500).json({
             error: "Error checking user",
         });

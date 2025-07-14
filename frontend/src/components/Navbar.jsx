@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, Bell } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import { useAdminAuthStore } from "../store/useAdminAuthStore";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const {
@@ -12,6 +12,7 @@ const Navbar = () => {
     getAllJoiningRequests,
     joiningRequests,
     isFetchingRequests,
+    handleJoiningRequest,
   } = useAuthStore();
   const { adminLogin, adminRole } = useAdminAuthStore();
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -40,6 +41,33 @@ const Navbar = () => {
   }
 
   const groupRequests = joiningRequests?.data?.groupRequests || [];
+
+  const handleAccept = async (requestId, groupId, action) => {
+    try {
+      // Call your API or update logic
+      console.log("Accepted request:", requestId);
+      console.log(groupId);
+      console.log(action);
+      // Optionally refetch the list or update state
+
+      await handleJoiningRequest(requestId, groupId, action);
+    } catch (err) {
+      console.error("Error accepting request", err);
+    }
+  };
+
+  const handleReject = async (requestId, groupId, action) => {
+    try {
+      // Call your API or update logic
+      console.log("Rejected request:", requestId);
+      console.log(groupId);
+      console.log(action);
+      // Optionally refetch the list or update state
+      await handleJoiningRequest(requestId, groupId, action);
+    } catch (err) {
+      console.error("Error rejecting request", err);
+    }
+  };
 
   if (authUser || adminLogin) {
     return (
@@ -109,24 +137,57 @@ const Navbar = () => {
               <h3 className="font-bold text-lg mb-4">Join Requests</h3>
 
               {joiningRequests?.data?.groupRequests?.length > 0 ? (
-                <ul className="space-y-3">
+                <div className="grid gap-4">
                   {joiningRequests.data.groupRequests.map((req) => (
-                    <li key={req.id} className="border-b pb-2">
-                      <p>
-                        <strong>User:</strong> {req.userId}
+                    <div
+                      key={req.id}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border"
+                    >
+                      <p className="mb-1">
+                        <strong>User:</strong> {req.studentId}
                       </p>
-                      <p>
+                      <p className="mb-1">
                         <strong>Group:</strong> {req.groupId}
                       </p>
-                      <p>
-                        <strong>Reason:</strong> {req.note}
+                      <p className="mb-1">
+                        <strong>Reason:</strong> {req.request_note_by_student}
                       </p>
-                      <p>
-                        <strong>Status:</strong> {req.status}
+                      <p className="mb-3">
+                        <strong>Status:</strong>{" "}
+                        <span
+                          className={`font-semibold ${
+                            req.status === "REQUESTED"
+                              ? "text-yellow-500"
+                              : req.status === "accepted"
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {req.status}
+                        </span>
                       </p>
-                    </li>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() =>
+                            handleAccept(req.id, req.groupId, "ACCEPTED")
+                          }
+                          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        >
+                          Accept Request
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleReject(req.id, req.groupId, "REJECTED")
+                          }
+                          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        >
+                          Reject Request
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
                 <p>No requests found.</p>
               )}

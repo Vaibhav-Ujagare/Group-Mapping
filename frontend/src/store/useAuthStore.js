@@ -72,7 +72,6 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.post(`/user/request/${groupId}`, {
         note: data,
       });
-      console.log(res.data.message);
       toast.success(res.data.message);
     } catch (error) {
       console.error("❌ Error sending join request:", error);
@@ -89,7 +88,7 @@ export const useAuthStore = create((set) => ({
       set({ joiningRequests: res.data });
       toast.success("All Requests Fetched Successfully");
     } catch (error) {
-      // toast.error("Failed to Fetch join request");
+      toast.error("Failed to Fetch join request");
       set({ joiningRequests: [] });
     } finally {
       set({ isFetchingRequests: false });
@@ -135,6 +134,20 @@ export const useAuthStore = create((set) => ({
       set({ allUsers: [] });
     } finally {
       set({ isFetchingProfile: false });
+    }
+  },
+
+  handleJoiningRequest: async (requestId, userId, action) => {
+    try {
+      const res = await axiosInstance.post(`/user/handle-request/`, {
+        requestId: requestId,
+        userId: userId,
+        action: action,
+      });
+      toast.success(res.data.message);
+    } catch (error) {
+      console.error("❌ Error sending join request:", error);
+      toast.error("Failed to send join request");
     }
   },
 }));

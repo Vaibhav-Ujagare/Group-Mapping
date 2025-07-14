@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useGroupStore } from "../store/useGroupStore";
 import CreateGroup from "./CreateGroup";
 import GroupModal from "./GroupModal";
-import toast from "react-hot-toast";
 import JoinRequestModal from "../components/JoinRequestModal";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -18,6 +17,7 @@ const GroupList = ({ groups }) => {
   const [selectedGroupForJoin, setSelectedGroupForJoin] = useState(null);
 
   const handleViewGroup = (group) => {
+    console.log(group);
     setSelectedGroup(group);
   };
 

@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import CsvUploader from "../components/CsvUploader";
 import { useAdminAuthStore } from "../store/useAdminAuthStore";
-import UserList from "../components/UserList";
 
 const AdminHomePage = () => {
   const { csvData, showCSVData } = useAdminAuthStore();
@@ -28,7 +27,7 @@ const AdminHomePage = () => {
         <div className=" px-2  basis-1/2">
           {csvData.length > 0 ? (
             <div className="collapse bg-base-100 border border-white-base-300 mt-4">
-              <input type="checkbox" className="peer" checked />
+              <input type="checkbox" className="peer" defaultChecked />
               <div className="collapse-title font-semibold peer-checked:bg-base-200 flex place-content-between">
                 Cohort CSV DATA
               </div>
