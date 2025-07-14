@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useGroupStore } from "../store/useGroupStore";
 import CreateGroup from "./CreateGroup";
 import GroupModal from "./GroupModal";
+import toast from "react-hot-toast";
+import JoinRequestModal from "../components/JoinRequestModal";
+import { useAuthStore } from "../store/useAuthStore";
 
 const GroupList = ({ groups }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { createGroup } = useGroupStore();
 
+  const { sendJoiningRequest } = useAuthStore();
+
   const [selectedGroup, setSelectedGroup] = useState(null);
+
+  const [selectedGroupForJoin, setSelectedGroupForJoin] = useState(null);
 
   const handleViewGroup = (group) => {
     setSelectedGroup(group);
@@ -16,6 +23,20 @@ const GroupList = ({ groups }) => {
 
   const handleCreateGroup = async (data) => {
     await createGroup(data);
+  };
+
+  const handleOpenJoinModal = (group) => {
+    console.log(group);
+    setSelectedGroupForJoin(group);
+  };
+
+  const handleCloseJoinModal = () => {
+    setSelectedGroupForJoin(null);
+  };
+
+  const handleSendJoinRequest = async (groupId, reason) => {
+    // Replace with API call
+    await sendJoiningRequest(groupId, reason);
   };
 
   return (
@@ -69,7 +90,7 @@ const GroupList = ({ groups }) => {
                       View Group
                     </button>
                     <button
-                      onClick={() => handleJoinRequest(group.id)}
+                      onClick={() => handleOpenJoinModal(group)}
                       className="btn btn-success btn-sm"
                     >
                       Send Join Request
@@ -79,6 +100,11 @@ const GroupList = ({ groups }) => {
               </div>
             ))}
           </div>
+          <JoinRequestModal
+            group={selectedGroupForJoin}
+            onClose={handleCloseJoinModal}
+            onSend={handleSendJoinRequest}
+          />
         </div>
 
         {/* Show Modal if selected */}

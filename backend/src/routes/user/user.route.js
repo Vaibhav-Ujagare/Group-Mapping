@@ -27,7 +27,7 @@ userRoute.get("/profile", isLoggedIn, getUserProfile);
 
 userRoute.get("/:userId/history", isLoggedIn, getUserHistory);
 
-userRoute.get("/all-users", isLoggedIn, getAllUsers);
+userRoute.get("/all-users", getAllUsers);
 
 userRoute.post("/handle-request", isLoggedIn, handleRequest);
 

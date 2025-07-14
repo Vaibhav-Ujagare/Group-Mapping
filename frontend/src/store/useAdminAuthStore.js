@@ -70,7 +70,6 @@ export const useAdminAuthStore = create((set) => ({
     set({ isDataLoading: true });
     try {
       const res = await axiosInstance.get("/admin/student-data");
-      console.log(res.data);
       set({ csvData: res.data.data });
       toast.success("CSV Data Load successfully");
     } catch (error) {

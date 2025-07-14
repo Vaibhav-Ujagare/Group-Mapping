@@ -13,6 +13,7 @@ export const useAuthStore = create((set) => ({
   userRole: null,
   userProfile: [],
   joiningRequests: [],
+  allUsers: [],
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
@@ -21,7 +22,6 @@ export const useAuthStore = create((set) => ({
 
       set({ authUser: res.data.user, userRole: "STUDENT" });
     } catch (error) {
-      console.log("❌ Error checking auth:", error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -69,8 +69,11 @@ export const useAuthStore = create((set) => ({
   sendJoiningRequest: async (groupId, data) => {
     set({ isRequesting: true });
     try {
-      await axiosInstance.post(`/user/request/${groupId}`, data);
-      toast.success("Joining request sent successfully");
+      const res = await axiosInstance.post(`/user/request/${groupId}`, {
+        note: data,
+      });
+      console.log(res.data.message);
+      toast.success(res.data.message);
     } catch (error) {
       console.error("❌ Error sending join request:", error);
       toast.error("Failed to send join request");
@@ -82,11 +85,12 @@ export const useAuthStore = create((set) => ({
   getAllJoiningRequests: async () => {
     set({ isFetchingRequests: true });
     try {
-      await axiosInstance.get(`/user/getAllRequests`);
+      const res = await axiosInstance.get(`/user/getAllRequests`);
+      set({ joiningRequests: res.data });
       toast.success("All Requests Fetched Successfully");
     } catch (error) {
-      console.error("❌ Error sending join request:", error);
-      toast.error("Failed to Fetch join request");
+      // toast.error("Failed to Fetch join request");
+      set({ joiningRequests: [] });
     } finally {
       set({ isFetchingRequests: false });
     }
@@ -106,9 +110,29 @@ export const useAuthStore = create((set) => ({
         set({ userProfile: null });
       }
     } catch (error) {
-      console.error("❌ Error fetching user profile:", error);
       toast.error("Failed to fetch user profile");
       set({ userProfile: null });
+    } finally {
+      set({ isFetchingProfile: false });
+    }
+  },
+
+  getAllUsers: async () => {
+    set({ isFetchingProfile: true });
+    try {
+      const res = await axiosInstance.get(`/user/all-users`);
+      // Check if user exists
+      if (res.data?.data?.users) {
+        set({ allUsers: res.data.data.users });
+        toast.success("Profile fetched successfully");
+      } else {
+        toast.error("User profile not found");
+        set({ allUsers: [] });
+      }
+    } catch (error) {
+      console.error("❌ Error fetching user profile:", error);
+      toast.error("Failed to fetch user profile");
+      set({ allUsers: [] });
     } finally {
       set({ isFetchingProfile: false });
     }

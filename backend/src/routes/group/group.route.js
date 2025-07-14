@@ -15,7 +15,7 @@ const groupRoute = Router();
 
 groupRoute.post("/create", isLoggedIn, createGroup);
 
-groupRoute.get("/all-groups", isLoggedIn, getAllGroups);
+groupRoute.get("/all-groups", getAllGroups);
 
 groupRoute.get("/:groupId/group-members", isLoggedIn, getAllGroupMembers);
 

@@ -313,8 +313,7 @@ export const getGroupHistory = asyncHandler(async (req, res) => {
 
 export const getGroupProfile = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
-
-    const group = db.group_details.findMany({
+    const group = await db.group_details.findMany({
         where: {
             id: groupId,
         },

@@ -48,6 +48,7 @@ function App() {
             index
             element={adminUser ? <AdminHomePage /> : <Navigate to={"/login"} />}
           />
+          <Route path="/admin/profile" element={<ProfilePage />} />
         </Route>
 
         <Route

@@ -123,7 +123,7 @@ export const selectCohort = asyncHandler(async (req, res) => {
 });
 
 export const getAllUsers = asyncHandler(async (req, res) => {
-    const users = db.student_details.findMany({});
+    const users = await db.student_details.findMany({});
 
     return res
         .status(201)
@@ -168,7 +168,16 @@ export const sendJoiningRequest = asyncHandler(async (req, res) => {
     });
 
     if (existingRequest) {
-        throw new ApiError(400, "Request already send");
+        // throw new ApiError(400, "Request already send");
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(
+                    200,
+                    { existingRequest },
+                    "You Already sent a request to this group",
+                ),
+            );
     }
 
     const newRequest = await db.group_joining_request_details.create({
