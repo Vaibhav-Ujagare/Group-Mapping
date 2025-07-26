@@ -20,9 +20,9 @@ const UserList = () => {
           </div>
 
           {/* Scrollable Content */}
-          <div className="collapse-content mt-4 px-4 pb-6 overflow-auto space-y-4">
+          <div className="collapse-content mt-4 px-4 pb-6 overflow-auto space-y-4 ">
             {/* Search Bar */}
-            <div className="w-full">
+            <div className="w-full ">
               <label className="input input-bordered flex items-center gap-2 max-w-md mx-auto">
                 <svg
                   className="w-5 h-5 opacity-60"
